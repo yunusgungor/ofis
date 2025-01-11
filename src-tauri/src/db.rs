@@ -1,6 +1,14 @@
-use rusqlite::{Connection, Result, params};
+use rusqlite::{Connection, Result, params, types::ValueRef};
 use crate::get_db_path;
 use crate::models::{Job, Person, Group};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TableUpdate {
+    id: i64,
+    field: String,
+    value: serde_json::Value,
+}
 
 pub struct Database;
 
@@ -371,5 +379,82 @@ impl Database {
 
         groups.collect::<Result<_, _>>()
             .map_err(|e| e.to_string())
+    }
+
+    pub async fn fetch_table_data(&self, table_name: &str) -> Result<Vec<serde_json::Value>, String> {
+        let conn = Connection::open(get_db_path())
+            .map_err(|e| format!("Veritabanı bağlantısı kurulamadı: {}", e))?;
+
+        let query = format!("SELECT * FROM {}", table_name);
+        let mut stmt = conn.prepare(&query)
+            .map_err(|e| format!("Sorgu hazırlanamadı: {}", e))?;
+
+        let column_names: Vec<String> = stmt
+            .column_names()
+            .into_iter()
+            .map(String::from)
+            .collect();
+
+        let rows = stmt.query_map([], |row| {
+            let mut map = serde_json::Map::new();
+            for (i, column_name) in column_names.iter().enumerate() {
+                let value: serde_json::Value = match row.get_ref(i) {
+                    Ok(val) => match val {
+                        ValueRef::Null => serde_json::Value::Null,
+                        ValueRef::Integer(i) => serde_json::Value::Number(i.into()),
+                        ValueRef::Real(f) => {
+                            if let Some(n) = serde_json::Number::from_f64(f) {
+                                serde_json::Value::Number(n)
+                            } else {
+                                serde_json::Value::Null
+                            }
+                        },
+                        ValueRef::Text(t) => serde_json::Value::String(String::from_utf8_lossy(t).into_owned()),
+                        ValueRef::Blob(_) => serde_json::Value::Null,
+                    },
+                    Err(_) => serde_json::Value::Null,
+                };
+                map.insert(column_name.clone(), value);
+            }
+            Ok(serde_json::Value::Object(map))
+        })
+        .map_err(|e| format!("Veri okunamadı: {}", e))?;
+
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| format!("Veri dönüştürülemedi: {}", e))
+    }
+
+    pub async fn update_table_data(
+        &self,
+        table_name: &str,
+        updates: Vec<TableUpdate>
+    ) -> Result<(), String> {
+        let mut conn = Connection::open(get_db_path())
+            .map_err(|e| format!("Veritabanı bağlantısı kurulamadı: {}", e))?;
+
+        let tx = conn.transaction()
+            .map_err(|e| format!("Transaction başlatılamadı: {}", e))?;
+
+        for update in updates {
+            let query = format!(
+                "UPDATE {} SET {} = ?1 WHERE id = ?2",
+                table_name,
+                update.field
+            );
+
+            let value_str = update.value.to_string();
+            tx.execute(
+                &query,
+                params![
+                    value_str,
+                    update.id
+                ],
+            ).map_err(|e| format!("Güncelleme yapılamadı: {}", e))?;
+        }
+
+        tx.commit()
+            .map_err(|e| format!("Transaction tamamlanamadı: {}", e))?;
+
+        Ok(())
     }
 }

@@ -2,16 +2,28 @@
 
 ## High Priority
 
--   [ ] I want to develop a Job Manager for a company. The Job Manager will have the following features: adding and removing employees, adding and removing groups, adding and removing employees from groups, assigning and removing shifts for groups, and adding and removing shifts. (**Status:** To Do, **Assigned To:** Claude, **Notes:** Need to consider scalability.)
+-   [ ] Add advanced features for the Table plugin:
+-   [ ] Row/column drag-and-drop functionality
+-   [ ] Data validation and error handling
+-   [ ] Customizable cell rendering
+-   [ ] Batch operation support
+-   [ ] Filtering and sorting capabilities (**Status:** In Progress, **Assigned To:** Claude, **Notes:** Using Handsontable integration)
 
 ## Medium Priority
 
-
+-   [ ] Table data import/export functionality
+-   [ ] Save table view settings
+-   [ ] Search functionality within tables
+-   [ ] Conditional formatting support
 
 ## Low Priority
 
-
+-   [ ] Table printing functionality
+-   [ ] Table template creation
+-   [ ] Table history and undo feature
 
 ## Completed
 
--   [x] Set up project structure.
+-   [x] Created basic table component
+-   [x] Added column and row components
+-   [x] Implemented basic data manipulation support

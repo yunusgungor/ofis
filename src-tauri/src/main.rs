@@ -41,7 +41,9 @@ fn main() {
             fetch_job_persons,
             fetch_job_groups,
             update_person,
-            delete_person
+            delete_person,
+            fetch_table_data,
+            update_table_data
         ])
         .run(tauri::generate_context!())
         .expect("Tauri uygulaması başlatılırken hata oluştu");

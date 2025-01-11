@@ -1,8 +1,12 @@
 use crate::models::Person;
 use crate::models::Group;
 use crate::models::Job;
+
+use crate::db::TableUpdate;
 use crate::db::Database;
+
 use tauri::State;
+
 
 #[tauri::command]
 pub async fn fetch_all_persons(db: State<'_, Database>) -> Result<Vec<Person>, String> {
@@ -142,4 +146,21 @@ pub async fn fetch_job_groups(job_id: i64, db: State<'_, Database>) -> Result<Ve
     db.inner().fetch_job_groups(job_id)
         .await
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn fetch_table_data(
+    table_name: String,
+    db: State<'_, Database>
+) -> Result<Vec<serde_json::Value>, String> {
+    db.fetch_table_data(&table_name).await
+}
+
+#[tauri::command]
+pub async fn update_table_data(
+    table_name: String,
+    updates: Vec<TableUpdate>,
+    db: State<'_, Database>
+) -> Result<(), String> {
+    db.update_table_data(&table_name, updates).await
 }

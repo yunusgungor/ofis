@@ -1,12 +1,12 @@
 import { Plugin } from '@core/types';
-import {PersonList} from '@plugins/table/components/PersonList';
+import { TestTabel } from './components/TestTabel';
 
 export const TablePlugin: Plugin = {
   id: 'table',
   name: 'Tablo Arayüzü',
   description: 'Tablo eklentisi',
   version: '1.0.0',
-  component: PersonList,
+  component: TestTabel,
   enabled: true,
   settings: {
     defaultView: 'table',
