@@ -1,0 +1,22 @@
+# Directory Structure
+
+-   **components/**: Reusable UI components (e.g., Button, Input, List)
+-   **hooks/**: Custom React hooks (e.g., useAuth, useData)
+-   **lib/**: Utility functions and API clients
+-   **pages/**: Top-level application pages (e.g., Home, Login, Register)
+-   **styles/**: Global styles and theme definitions
+-   **types/**: TypeScript types and interfaces
+-   **utils/**: Miscellaneous utility functions
+-   **.notes/**: Notes and documentation
+-   **.cursorrules**: Cursor rules
+-   **.env**: Environment variables
+-   **.gitignore**: Git ignore rules
+-   **.prettierrc**: Prettier configuration
+-   **.vscode**: VSCode configuration
+-   **public/**: Static assets (e.g., images, fonts)
+-   **src/**: Main source code directory
+-   **test/**: Test files and suites
+-   **src-tauri/**: Tauri specific code (e.g., window creation, IPC, etc.)
+-   **src-tauri/src/**: Tauri specific source code
+-   **src-tauri/target/**: Tauri specific build output
+-   **src-tauri/tauri.conf.json**: Tauri configuration file
