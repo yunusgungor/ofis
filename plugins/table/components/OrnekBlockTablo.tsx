@@ -21,7 +21,7 @@ export function OrnekBlockTablo() {
     {
       id: 'blok1',
       baslik: 'Yazılım Departmanı',
-      aciklama: <span>Yazılım ekibinin maaş tablosu</span>,
+      aciklama: '',
       data: [
         {
           id: 1,
@@ -42,7 +42,7 @@ export function OrnekBlockTablo() {
     {
       id: 'blok2',
       baslik: 'Tasarım Departmanı',
-      aciklama: 'Tasarım ekibinin maaş tablosu',
+      aciklama: '',
       data: [
         {
           id: 3,
@@ -79,10 +79,8 @@ export function OrnekBlockTablo() {
       <Table
         blocks={blocks}
         columns={columns}
-        blockClassName="bg-white shadow-lg rounded-xl"
-        blockHeaderClassName="text-xl text-blue-600 font-semibold"
-        blockDescriptionClassName="text-gray-500 italic"
-        width="100%"
+        blockClassName="bg-white shadow-lg rounded-xl overflow-hidden"
+        blockHeaderClassName="text-xl text-blue-600 font-semibold bg-gray-100 p-4 text-center border border-[#CCC] border-b-0"
         height="auto"
         onDataChange={(changes) => {
           if (!changes) return;

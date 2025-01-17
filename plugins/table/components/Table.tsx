@@ -179,6 +179,28 @@ export const Table = forwardRef<HotTableRef, TableProps>(({
       : height;
   }, [height]);
 
+  const calculateWidth = useCallback((data: any[], columns: any[]) => {
+    const charWidth = 10; // Ortalama karakter genişliği (piksel)
+    const padding = 40; // Hücre padding'i
+    
+    // Sütun başlıklarının genişliği
+    const headerWidths = columns.map(col => (col.title?.length || 0) * charWidth + padding);
+    
+    // Veri hücrelerinin genişliği
+    const cellWidths = columns.map(col => {
+      const maxLength = Math.max(...data.map(row => String(row[col.data]).length));
+      return maxLength * charWidth + padding;
+    });
+
+    // Her sütun için maksimum genişliği al
+    const finalWidths = headerWidths.map((headerWidth, index) => 
+      Math.max(headerWidth, cellWidths[index])
+    );
+
+    // Toplam genişlik
+    return finalWidths.reduce((sum, width) => sum + width, 0) + 100; // Extra padding
+  }, []);
+
   const renderBlock = useCallback((block: TableBlock) => {
     const tableHeight = calculateHeight(block.data);
     
@@ -206,8 +228,10 @@ export const Table = forwardRef<HotTableRef, TableProps>(({
           ref={ref}
           data={block.data}
           columns={finalColumns}
-          width={width}
           height={tableHeight}
+          stretchH="all"
+          width="100%"
+          autoColumnSize={true}
           rowHeaders={true}
           colHeaders={true}
           filters={true}
@@ -234,7 +258,7 @@ export const Table = forwardRef<HotTableRef, TableProps>(({
         key={block.id} 
         ref={el => blockRefs.current[block.id] = el}
         className={cn(
-          "mb-6 p-6 rounded-xl bg-white shadow-sm transition-all",
+          "mb-6 p-6 rounded-xl w-full",
           activeBlockId === block.id ? "ring-2 ring-blue-500 ring-opacity-50" : "",
           blockClassName
         )}
