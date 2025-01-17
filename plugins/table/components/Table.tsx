@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { forwardRef } from 'react';
-import { HotTable, HotTableRef } from '@handsontable/react-wrapper';
+import { HotTable, HotTableProps, HotTableRef } from '@handsontable/react-wrapper';
 import { registerAllModules } from 'handsontable/registry';
 import { invoke } from '@tauri-apps/api/core';
 import 'handsontable/styles/handsontable.css';
 import 'handsontable/styles/ht-theme-main.css';
+import { cn } from '@/lib/utils';
 
 registerAllModules();
 
@@ -19,7 +20,7 @@ interface TableBlock {
   data: TableData[];
 }
 
-interface TableProps {
+export interface TableProps extends HotTableProps {
   data?: TableData[];
   tableName?: string;
   blocks?: TableBlock[];
@@ -32,9 +33,15 @@ interface TableProps {
   }>;
   children?: React.ReactNode;
   readOnly?: boolean;
-  width?: number | string;
-  height?: number;
+  width?: string | number;
+  height?: string | number;
   onDataChange?: (changes: any[] | null) => void;
+  blockClassName?: string;
+  blockHeaderClassName?: string;
+  blockDescriptionClassName?: string;
+  renderBlockHeader?: (block: TableBlock) => React.ReactNode;
+  renderBlockDescription?: (block: TableBlock) => React.ReactNode;
+  renderBlockWrapper?: (block: TableBlock, children: React.ReactNode) => React.ReactNode;
 }
 
 export const Table = forwardRef<HotTableRef, TableProps>(({
@@ -47,6 +54,12 @@ export const Table = forwardRef<HotTableRef, TableProps>(({
   width = '100%',
   height = 'auto',
   onDataChange,
+  blockClassName,
+  blockHeaderClassName,
+  blockDescriptionClassName,
+  renderBlockHeader,
+  renderBlockDescription,
+  renderBlockWrapper,
   ...props
 }, ref) => {
   const [data, setData] = useState<TableData[]>(initialData || []);
@@ -156,37 +169,80 @@ export const Table = forwardRef<HotTableRef, TableProps>(({
     });
   }, []);
 
-  const renderBlock = useCallback((block: TableBlock) => (
-    <div 
-      key={block.id} 
-      ref={el => blockRefs.current[block.id] = el}
-      className={`mb-6 p-6 rounded-xl bg-white shadow-sm transition-all
-        ${activeBlockId === block.id ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
-    >
-      <h2 className="text-xl font-semibold mb-2">{block.baslik}</h2>
-      <div className="text-gray-600 mb-4">{block.aciklama}</div>
-      <HotTable
-        ref={ref}
-        data={block.data}
-        columns={finalColumns}
-        width={width}
-        height={height}
-        rowHeaders={true}
-        colHeaders={true}
-        filters={true}
-        dropdownMenu={true}
-        contextMenu={true}
-        multiColumnSorting={true}
-        manualColumnResize={true}
-        manualRowResize={true}
-        readOnly={readOnly}
-        licenseKey="non-commercial-and-evaluation"
-        afterChange={(changes) => changes && handleBlockDataChange(block.id, changes)}
-        className="htCenter"
-        {...props}
-      />
-    </div>
-  ), [finalColumns, width, height, readOnly, handleBlockDataChange, activeBlockId]);
+  const calculateHeight = useCallback((data: any[]) => {
+    const rowHeight = 23; // Varsayılan satır yüksekliği
+    const headerHeight = 30; // Başlık yüksekliği
+    const minHeight = 100; // Minimum yükseklik
+    
+    return height === 'auto' 
+      ? Math.max(minHeight, (data.length * rowHeight) + headerHeight)
+      : height;
+  }, [height]);
+
+  const renderBlock = useCallback((block: TableBlock) => {
+    const tableHeight = calculateHeight(block.data);
+    
+    const defaultBlockContent = (
+      <>
+        {renderBlockHeader?.(block) ?? (
+          <h2 className={cn(
+            "text-xl font-semibold mb-2",
+            blockHeaderClassName
+          )}>
+            {block.baslik}
+          </h2>
+        )}
+        
+        {renderBlockDescription?.(block) ?? (
+          <div className={cn(
+            "text-gray-600 mb-4",
+            blockDescriptionClassName
+          )}>
+            {block.aciklama}
+          </div>
+        )}
+        
+        <HotTable
+          ref={ref}
+          data={block.data}
+          columns={finalColumns}
+          width={width}
+          height={tableHeight}
+          rowHeaders={true}
+          colHeaders={true}
+          filters={true}
+          dropdownMenu={true}
+          contextMenu={true}
+          multiColumnSorting={true}
+          manualColumnResize={true}
+          manualRowResize={true}
+          readOnly={readOnly}
+          licenseKey="non-commercial-and-evaluation"
+          afterChange={(changes) => changes && handleBlockDataChange(block.id, changes)}
+          className="htCenter"
+          {...props}
+        />
+      </>
+    );
+
+    if (renderBlockWrapper) {
+      return renderBlockWrapper(block, defaultBlockContent);
+    }
+
+    return (
+      <div 
+        key={block.id} 
+        ref={el => blockRefs.current[block.id] = el}
+        className={cn(
+          "mb-6 p-6 rounded-xl bg-white shadow-sm transition-all",
+          activeBlockId === block.id ? "ring-2 ring-blue-500 ring-opacity-50" : "",
+          blockClassName
+        )}
+      >
+        {defaultBlockContent}
+      </div>
+    );
+  }, [finalColumns, width, height, readOnly, handleBlockDataChange, activeBlockId, blockClassName, blockHeaderClassName, blockDescriptionClassName, renderBlockHeader, renderBlockDescription, renderBlockWrapper]);
 
   useEffect(() => {
     if (initialBlocks) setBlocks(initialBlocks);

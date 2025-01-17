@@ -5,13 +5,15 @@ interface VeriBlok {
   id: string;
   baslik: string;
   aciklama: React.ReactNode;
-  data: {
-    id: number;
-    ad: string;
-    soyad: string;
-    departman: string;
-    maas: number;
-  }[];
+  data: Personel[];
+}
+
+interface Personel {
+  id: number;
+  ad: string;
+  soyad: string;
+  departman: string;
+  maas: number;
 }
 
 export function OrnekBlockTablo() {
@@ -61,20 +63,14 @@ export function OrnekBlockTablo() {
   ]);
 
   const columns = [
-    { 
-      data: 'id',
-      title: 'ID',
-      type: 'numeric' as const,
-      readOnly: true
-    },
-    { data: 'ad', title: 'Ad' },
-    { data: 'soyad', title: 'Soyad' },
-    { data: 'departman', title: 'Departman' },
-    { 
-      data: 'maas',
-      title: 'Maaş',
-      type: 'numeric' as const
-    }
+    { data: 'id', title: 'ID', type: 'numeric' as const, readOnly: true },
+    { data: 'ad', title: 'Ad', type: 'text' as const },
+    { data: 'soyad', title: 'Soyad', type: 'text' as const },
+    { data: 'departman', title: 'Departman', type: 'text' as const },
+    { data: 'maas', title: 'Maaş', type: 'numeric' as const, numericFormat: {
+      pattern: '0,0 ₺',
+      culture: 'tr-TR'
+    }}
   ];
 
   return (
@@ -83,13 +79,23 @@ export function OrnekBlockTablo() {
       <Table
         blocks={blocks}
         columns={columns}
+        blockClassName="bg-white shadow-lg rounded-xl"
+        blockHeaderClassName="text-xl text-blue-600 font-semibold"
+        blockDescriptionClassName="text-gray-500 italic"
         width="100%"
-        height={400}
+        height="auto"
         onDataChange={(changes) => {
           if (!changes) return;
           console.log('Değişiklikler:', changes);
         }}
         readOnly={false}
+        rowHeaders={true}
+        colHeaders={true}
+        filters={true}
+        dropdownMenu={true}
+        contextMenu={true}
+        multiColumnSorting={true}
+        manualColumnResize={true}
       />
     </div>
   );
