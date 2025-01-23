@@ -4,11 +4,12 @@ import { PluginProvider } from "@core/providers/PluginProvider";
 import { PluginRenderer } from "@core/components/PluginRenderer";
 
 import { TablePlugin } from "@plugins/table";
+import { FlowPlugin } from "@plugins/flow";
 
 function App() {
   return (
     <PluginProvider>
-      <PluginRenderer pluginId={TablePlugin.id} />
+      <PluginRenderer pluginId={FlowPlugin.id} />
     </PluginProvider>
   );
 }

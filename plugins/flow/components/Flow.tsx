@@ -8,7 +8,6 @@ const nodeTypes = {
 };
 
 export const Flow = () => {
-
   const nodes = [
     {
       id: '0',
@@ -31,12 +30,15 @@ export const Flow = () => {
   ];
 
   return (
-    <ReactFlowProvider>
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-      />;
-    </ReactFlowProvider>
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <ReactFlowProvider>
+        <ReactFlow
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          fitView
+        />
+      </ReactFlowProvider>
+    </div>
   );
 };
 
